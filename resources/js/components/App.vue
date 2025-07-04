@@ -1,7 +1,7 @@
 <template>
     <div>
         <div class="d-flex justify-content-center align-items-center my-5">
-            <div class="card p-4 shadow" style="min-width: 350px;">
+            <div class="card p-4 shadow" style="min-width: 350px; width: 400px;">
                 <form>
                     <label for="fileInput" id="fileInput" class="form-label text-center w-100">Izaberite fajl</label>
                     <input @change="onFileChange" class="form-control" type="file" id="customFile">
@@ -13,13 +13,19 @@
 
                     <div class="accordion-item mt-1">
                         <div id="filteri_accordion" class="accordion-collapse collapse">
-                        <div class="accordion-body border p-2 rounded">
-                            <p>lalala</p>
-                            <!-- kriterijumi
-                            -model rada(hibrid, remote)
-                            - tehnologije(lista tehnologija)
-                            -da li da se trazi po svim kriterijumima ili samo ono sto se preklapa -->
-                        </div>
+                            <div class="accordion-body border p-2 rounded">
+                                <div class="mb-2">
+                                    <label class="form-label">Tehnologije</label>
+                                    <div class="row">
+                                        <div class="col-6" v-for="(tehnologija, index) in tehnologije" :key="index">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" :id="'tehnologija_' + index" v-model="tehnologija.active">
+                                                <label class="form-check-label" :for="'tehnologija_' + index">{{ tehnologija.name }}</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -58,10 +64,22 @@ export default {
             selectedFile: null,
             fileMessage: "",
             oglasi: null,
+
+            tehnologije: [
+                { name: "JavaScript", active: false },
+                { name: "Python", active: false },
+                { name: "Java", active: false },
+                { name: "C#", active: false },
+                { name: "PHP", active: false },
+                { name: "Laravel", active: false },
+                { name: "Vue.js", active: false },
+                { name: "WordPress", active: false }
+            ]
+
         };
     },
     mounted() {
-        console.log("lalala")
+        
     },
     methods: {
         onFileChange(event) {
@@ -80,11 +98,13 @@ export default {
             let th = this;
             const formData = new FormData();
             formData.append('file', th.selectedFile);
+            formData.append('tehnologije', JSON.stringify(th.tehnologije.filter(t => t.active).map(t => t.name)));
 
             axios.post("/updateFile", formData, {
 
             }).then( response => {
-                th.oglasi = response.data[0];
+                // console.log("Response ", response.data);
+                th.oglasi = response.data;
 
             }).catch( error => {
                 console.error("Greska ", error.response.error)
